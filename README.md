@@ -26,7 +26,8 @@
 
 ## RDS SQL 쿼리
 ### 변경 여부 확인
--> 다음 쿼리로 조회되는 건은 Support Plan의 변경이 있었던 날임 
+다음 쿼리로 조회되는 건은 Support Plan의 변경이 있었던 날임 
+
     mysql> select account_id, DATE_KST, count(distinct support_level) as count from (select account_id, date_format(date_add(date_time, interval 9 hour), '%Y-%m-%d') as DATE_KST, support_level from support_level_history) as data group by 1,2 having count > 1
     
 ### 매일 최종 Support level 확인
