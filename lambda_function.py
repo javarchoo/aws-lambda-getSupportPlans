@@ -8,8 +8,8 @@ print('Loading function')
 
 # RDS Access INFO
 # Block public access
-bucket="sktelecom-about-support-plan"
-object_key="rdb-access/aurora-access"
+bucket="<BucketName>"
+object_key="<ObjectKey>"
 
 def lambda_handler(event, context):
     
