@@ -2,12 +2,12 @@
 
 ## Business 요구사항
 - Consolidated billing시, 각 Linked Accout 들의 Business/Enterprise Support 비용은 Payer Accout에 통합 청구되며(**Premium Support**), Payer 관리 입장에서는 각 어카운트별로 사용량에 비례해서 Support 비용을 각 Linked Account에 배분해야 함
-- (Basic/Developer 등급의 비용은 Payer 계정에 통합청구되지 않으므로 관리 이슈 없음)
+- *(Basic/Developer 등급의 비용은 Payer 계정에 통합청구되지 않으므로 관리 이슈 없음)*
 - Enterprise 혹은 Business 를 매월 1일~말일까지 꾸준히 유지하는 경우는 큰 이슈가 없으나, 월 중간에 (예, 15일) 변경하였을 때는, 해당 기간 만큼의 Usage비용에 비례해서 배분해야 하는 요구사항이 있음
-- AWS Support Plan 변경 이력은 CloudTrail에도 남지 않으며, CUR(**Cost and Usage Report**)에도 기록이 남지 않아서 월 중간에 가입/탈퇴/등급 변경이 이루어졌을때, 추적이 불가함 (아직까지는 AWS Support Case를 열어서 이력을 확인하고 있음, (2020-06-13 현재)
+- AWS Support Plan 변경 이력은 CloudTrail에도 남지 않으며, CUR(**Cost and Usage Report**)에도 기록이 남지 않아서 월 중간에 가입/탈퇴/등급 변경이 이루어졌을때, 추적이 불가함 *(AWS Support Case를 열어서 Support Plan 변경 이력을 확인하고 있음, (2020-06-13 현재)*
 
 ## 기술적 요구사항
-- IAM Policy는 describe_support_level은 제공하고 있으나, API는 아직까지 제공하지 않고 있으며, ETA도 불명확한 상태임 (AWS문의 후 답변, [CASE 7086941771])
+- IAM Policy는 describe_support_level을 제공하고 있으나, API는 아직까지 제공하지 않고 있으며, ETA도 불명확한 상태임 (AWS문의 후 답변, [CASE 7086941771])
 - describe_severity_levels API의 등급에 따라서 Support Plan 확인이 가능하나, 해당 API는 Business/Enterprise 등급의 Account만 호출 가능, Basic/Developer 등급은 추가개발 필요 **TBD**, 현재는 unknown으로 등록 
 - AWS SSO에서 확인 가능한 Linked Accounts들의 access_key_id, secret_access_key, session_token 은 최대 12시간까지만 연장가능해서 정기 배치작업으로 활용 불편, 심지어 AWS SSO는 API제공하지 않음
 - 각 Linked Account에 Role 만들고 Assume하는 것이 보안적으로도 가장 좋으나, 고객사 계정이라 함부로 Role 생성 불가
