@@ -20,11 +20,13 @@
 - 1 Role 생성
 -   S3 Access, Support Access, Lambda 실행 권한
 - 2 Lambda 생성 시 1번의 Role Assign하고 event handler는 본 repo의 zip 파일을 받아서 업로드
-- 3 CloudWatch Event에서 Rule 등록 (*cron(45 23,0,1,2,3,4,5,6,7,8,9,14 \* \* ? \*)*)
+- 3 CloudWatch Event에서 Rule 등록 (*cron(45 23,0,1,2,3,4,5,6,7,8,9,14 \* \* \? \*)*)
+-   (일과시간 - 1시간마다 확인, 8:45 ~ 18:45 KST, 그리고 23:45 KST에 마지막으로 한번)
 - 4 rds 접속 후 이력 확인
 
 ## RDS SQL 쿼리
-### 변경 여부 확인(일과시간 - 1시간마다 확인, 8:45 ~ 18:45 KST, 그리고 23:45 KST에 마지막으로 한번 )    
+### 변경 여부 확인
+-> 다음 쿼리로 조회되는 건은 Support Plan의 변경이 있었던 날임 
     mysql> select account_id, DATE_KST, count(distinct support_level) as count from (select account_id, date_format(date_add(date_time, interval 9 hour), '%Y-%m-%d') as DATE_KST, support_level from support_level_history) as data group by 1,2 having count > 1
     
 ### 매일 최종 Support level 확인
