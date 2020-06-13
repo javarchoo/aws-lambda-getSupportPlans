@@ -21,7 +21,7 @@
 - ReadOnlyAccess(기존Policy), SupportReadOnly(새로생성)권한 Attach
 #### 2 Lambda실행을 위한 Role 생성
 - S3 Access, Support Access, Lambda 실행 권한
-#### 3 Lambda 생성 시 1번의 Role Assign하고 event handler는 본 repo의 zip 파일을 받아서 업로드
+#### 3 Lambda 생성 시 2번의 Role Assign하고 event handler는 본 repo의 zip 파일을 받아서 업로드
 - CloudWatch Event에서 Rule 등록 (*cron(45 23,0,1,2,3,4,5,6,7,8,9,14 \* \* \? \*)*)
 - (일과시간 - 1시간마다 확인, 8:45 ~ 18:45 KST, 그리고 23:45 KST에 마지막으로 한번)
 ### 4 rds 접속 후 이력 확인
