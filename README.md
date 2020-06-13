@@ -17,26 +17,23 @@
 - History 조회를 위한 RDS endpoint는 read endpoit 만을 사용자에게 제공
 
 ## 설정 순서
-- 1 각 계정에 IAM생성
-    ReadOnlyAccess(기존Policy), SupportReadOnly(새로생성)권한 Attach
-- 2 Lambda실행을 위한 Role 생성
-    S3 Access, Support Access, Lambda 실행 권한
-- 3 Lambda 생성 시 1번의 Role Assign하고 event handler는 본 repo의 zip 파일을 받아서 업로드
-- 4 CloudWatch Event에서 Rule 등록 (*cron(45 23,0,1,2,3,4,5,6,7,8,9,14 \* \* \? \*)*)
-    (일과시간 - 1시간마다 확인, 8:45 ~ 18:45 KST, 그리고 23:45 KST에 마지막으로 한번)
-- 5 rds 접속 후 이력 확인
+#### 1 각 계정에 IAM생성
+- ReadOnlyAccess(기존Policy), SupportReadOnly(새로생성)권한 Attach
+#### 2 Lambda실행을 위한 Role 생성
+- S3 Access, Support Access, Lambda 실행 권한
+#### 3 Lambda 생성 시 1번의 Role Assign하고 event handler는 본 repo의 zip 파일을 받아서 업로드
+- CloudWatch Event에서 Rule 등록 (*cron(45 23,0,1,2,3,4,5,6,7,8,9,14 \* \* \? \*)*)
+- (일과시간 - 1시간마다 확인, 8:45 ~ 18:45 KST, 그리고 23:45 KST에 마지막으로 한번)
+### 4 rds 접속 후 이력 확인
 
 ## RDS SQL 쿼리
 ### 어카운트별, 일자별 Support Plan 이력 확인하기
-- 두번째 쿼리는 특정 어카운트의 날짜별 이력 확인
-
+    두번째 쿼리는 특정 어카운트의 날짜별 이력 확인
     mysql> select distinct account_id, date_format(date_add(date_time, interval 9 hour), '%Y-%m-%d') as DATE_KST, support_level from support_level_history order by account_id, DATE_KST;
     mysql> select distinct account_id, date_format(date_add(date_time, interval 9 hour), '%Y-%m-%d') as DATE_KST, support_level from support_level_history where account_id = '000000000000' order by account_id, DATE_KST;
     mysql>
 
 ### 변경 여부 확인
-- 다음 쿼리로 조회되는 건은 Support Plan의 변경이 있었던 날임
-
+    다음 쿼리로 조회되는 건은 Support Plan의 변경이 있었던 날임
     mysql> select account_id, DATE_KST, count(distinct support_level) as count from (select account_id, date_format(date_add(date_time, interval 9 hour), '%Y-%m-%d') as DATE_KST, support_level from support_level_history) as data group by 1,2 having count > 1;
     mysql>
-    
