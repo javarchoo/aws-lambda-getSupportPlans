@@ -7,9 +7,9 @@ from datetime import datetime
 print('Loading function')
 
 # RDS Access INFO
-# Block public access
-bucket="<BucketName>"
-object_key="<ObjectKey>"
+# Access with Assigned Role, Block public access
+bucket="<bucket-name>"
+object_key="<object-key>"
 
 def lambda_handler(event, context):
     
@@ -18,10 +18,13 @@ def lambda_handler(event, context):
     print(rows)
     
     str_list = []
+    i = 1
     for row in rows:
+        print("[" + str(i) + "]")
         print(row)
         result = insertSupportPlan(row[1], row[2], rdsInfo)
-        str_list.append('Account ID: ' + result['AccountID'] + ', Support Plan: ' + result['SupportLevel'])
+        str_list.append('Account ID: ' + result['AccountID'] + ', Support Plan: ' + result['SupportLevel'] + "\n")
+        i+=1
 
     return ''.join(str_list)
 
@@ -34,7 +37,7 @@ def getRDSAccessInfo(bucket, object_key):
 def selectCredentials(rdsInfo):
     conn = getConn(rdsInfo)
     curs = conn.cursor()
-    sql = """select account_id, access_key_id, secret_access_key from support_level_api_users"""
+    sql = """select account_id, access_key_id, secret_access_key from support_level_api_users where use_yn = true"""
     curs.execute(sql)
     rows = curs.fetchall()
     conn.close()
@@ -60,29 +63,36 @@ def insertRDS(accountID, supportLevel, rdsInfo):
     conn.close()
     
 def insertSupportPlan(access_key_id, secret_access_key, rdsInfo):
+
+    account_id = ''
+    support_level = ''
+    
+    # caller_id확인 및 access_key_id, secret_access_key 유효 여부 확인    
     sts = boto3.client('sts',
         aws_access_key_id=access_key_id,
         aws_secret_access_key=secret_access_key)
-    # Support API supports only 'us-east-1' region.
-    support = boto3.client('support', region_name='us-east-1',
-        aws_access_key_id=access_key_id,
-        aws_secret_access_key=secret_access_key)
+    identity = sts.get_caller_identity()    
+    print(identity)
+    account_id = identity['Account']
 
     try:
+        # Support API supports only 'us-east-1' region.
+        support = boto3.client('support', region_name='us-east-1',
+            aws_access_key_id=access_key_id,
+            aws_secret_access_key=secret_access_key)
         response = support.describe_severity_levels()
-        identity = sts.get_caller_identity()
-        accountID = identity['Account']
-        supportLevel = getSupportLevel(len(support.describe_severity_levels()['severityLevels']))
-        print(identity)
+        support_level = getSupportLevel(len(support.describe_severity_levels()['severityLevels']))
+
         print(response)
 
-        insertRDS(accountID, supportLevel, rdsInfo)
-        return {"AccountID": identity['Account'], "SupportLevel": supportLevel}
     except Exception as e:
         print(e)
         print('Error...')
 #        raise e
-        return {"AccountID": identity['Account'], "SupportLeve": "unknown"}
+        support_level = "Basic/Developer"
+
+    insertRDS(account_id, support_level, rdsInfo)
+    return {"AccountID": account_id, "SupportLevel": support_level}
 
 def getSupportLevel(x):
     return {5: 'Enterprise', 4: 'Business'}[x]
